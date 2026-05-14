@@ -1,8 +1,8 @@
-certs/ca.crt
-certs/ca.key
-certs/ca.srl
-certs/receiver.crt
-certs/receiver.key
-certs/sender.crt
-certs/sender.key
-receiver
+runtime/certs/*
+runtime/data/*
+runtime/output/*
+runtime/bin/*
+!runtime/certs/.gitkeep
+!runtime/data/.gitkeep
+!runtime/output/.gitkeep
+!runtime/bin/.gitkeep
