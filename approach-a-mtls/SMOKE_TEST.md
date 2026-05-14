@@ -33,8 +33,7 @@ docker compose exec receiver sh
 **Step 5.** Confirm the received file exists and is intact on your host machine.
 
 ```bash
-shasum -a 256 approach-a-mtls/runtime/output/test_500mb.bin approach-a-mtls/runtime/output/test_500mb.bin
-ls -lh approach-a-mtls/runtime/output/test_500mb.bin
+shasum -a 256 approach-a-mtls/runtime/data/test_500mb.bin approach-a-mtls/runtime/output/test_500mb.bin
 ```
 
 **Pass criteria.** Transfer completes and the file is present in runtime/output.
@@ -125,9 +124,9 @@ openssl req -x509 -newkey rsa:2048 -keyout /tmp/fake.key -out /tmp/fake.crt -day
 openssl s_client -connect receiver:9090 -cert /tmp/fake.crt -key /tmp/fake.key
 ```
 
-**Step 6.** Confirm the receiver logged the rejected connection but wrote nothing to disk.
+**Step 5.** Confirm the receiver logged the rejected connection but wrote nothing to disk.
 
-**Step 7.** Confirm runtime/output is still empty on your host machine.
+**Step 6.** Confirm runtime/output is still empty on your host machine.
 
 ```bash
 ls approach-a-mtls/runtime/output/
