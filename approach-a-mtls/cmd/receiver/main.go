@@ -15,9 +15,13 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 )
 
-const chunkSize = 32 * 1024
+const (
+	chunkSize     = 32 * 1024
+	progressEvery = 100 * 1024 * 1024
+)
 
 type transferHeader struct {
 	Filename       string `json:"filename"`
@@ -85,6 +89,7 @@ func buildTLSConfig(caPath, certPath, keyPath string) (*tls.Config, error) {
 
 func handleConnection(conn net.Conn, outDir string) {
 	defer conn.Close()
+	log.Printf("connection accepted from %s", conn.RemoteAddr())
 
 	br := bufio.NewReaderSize(conn, chunkSize)
 
@@ -99,6 +104,7 @@ func handleConnection(conn net.Conn, outDir string) {
 		log.Printf("parse header error %v", err)
 		return
 	}
+	log.Printf("receiving file %q size %d bytes expected sha256 %s", hdr.Filename, hdr.FileSize, hdr.ExpectedSHA256)
 
 	safeFilename := filepath.Base(hdr.Filename)
 	tmpPath      := filepath.Join(outDir, safeFilename+".tmp")
@@ -119,11 +125,15 @@ func handleConnection(conn net.Conn, outDir string) {
 		}
 	}()
 
-	hash   := sha256.New()
-	buf    := make([]byte, chunkSize)
-	writer := io.MultiWriter(tmpFile, hash)
+	hash          := sha256.New()
+	buf           := make([]byte, chunkSize)
+	writer        := io.MultiWriter(tmpFile, hash)
+	var received  int64
+	var lastRecv  int64
+	nextMilestone := int64(progressEvery)
+	start         := time.Now()
+	lastTime      := start
 
-	var received int64
 	for {
 		n, err := br.Read(buf)
 		if n > 0 {
@@ -132,6 +142,18 @@ func handleConnection(conn net.Conn, outDir string) {
 				return
 			}
 			received += int64(n)
+
+			if received >= nextMilestone {
+				now       := time.Now()
+				elapsed   := now.Sub(lastTime).Seconds()
+				chunkMB   := float64(received-lastRecv) / (1024 * 1024)
+				pct       := float64(received) / float64(hdr.FileSize) * 100
+				log.Printf("progress %.1f%% received %d MB throughput %.2f MB/s",
+					pct, received/(1024*1024), chunkMB/elapsed)
+				lastTime      = now
+				lastRecv      = received
+				nextMilestone += progressEvery
+			}
 		}
 		if err == io.EOF {
 			break
@@ -158,6 +180,9 @@ func handleConnection(conn net.Conn, outDir string) {
 		return
 	}
 
+	totalMB  := float64(received) / (1024 * 1024)
+	totalSec := time.Since(start).Seconds()
 	success = true
-	log.Printf("transfer complete. file saved to %s sha256 verified", finalPath)
+	log.Printf("transfer complete. received %.1f MB in %.1f seconds average %.2f MB/s. file saved to %s sha256 verified",
+		totalMB, totalSec, totalMB/totalSec, finalPath)
 }

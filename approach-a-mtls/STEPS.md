@@ -144,4 +144,109 @@ transfer complete. file saved to runtime/output/test_4gb.bin sha256 verified
 
 ---
 
-<!-- Step 5 and beyond will be added as each program is completed -->
+## Step 5 Run with Docker Compose
+
+Docker Compose builds both binaries inside Alpine containers using multi-stage Dockerfiles
+and places them on a private bridge network. The sender resolves the receiver by its
+Docker service name which matches the DNS SAN baked into the receiver certificate.
+
+Make sure Steps 1 and 2 are complete before running this step. The certs and the test
+file must exist in runtime/ before the containers start.
+
+Build both images.
+
+```bash
+cd approach-a-mtls
+docker compose build
+```
+
+Start both containers in the background. They will stay alive until you stop them.
+
+```bash
+docker compose up -d
+```
+
+Open a shell inside the receiver container in one terminal.
+
+```bash
+docker compose exec receiver sh
+```
+
+Inside that shell start the receiver program.
+
+```bash
+./receiver \
+  -addr  :9090 \
+  -ca    /certs/ca.crt \
+  -cert  /certs/receiver.crt \
+  -key   /certs/receiver.key \
+  -out   /output
+```
+
+The receiver prints the following and waits for a connection.
+
+```
+receiver listening on :9090
+```
+
+Open a second terminal and shell into the sender container.
+
+```bash
+docker compose exec sender sh
+```
+
+Inside that shell start the transfer.
+
+```bash
+./sender \
+  -file        /data/test_4gb.bin \
+  -addr        receiver:9090 \
+  -ca          /certs/ca.crt \
+  -cert        /certs/sender.crt \
+  -key         /certs/sender.key \
+  -server-name receiver
+```
+
+When the transfer completes both containers print their confirmation messages.
+
+```
+sender   | transfer complete
+receiver | transfer complete. file saved to /output/test_4gb.bin sha256 verified
+```
+
+The received file lands in runtime/output/test_4gb.bin on your host machine.
+
+To stop and remove the containers run the following command.
+
+```bash
+docker compose down
+```
+
+### Simulating a mid-transfer failure
+
+To prove the fail-closed mechanism works open a third terminal and kill the sender
+container while the transfer is running.
+
+```bash
+docker compose kill sender
+```
+
+The receiver detects the broken connection, logs an error, and deletes the partial
+file. You can confirm runtime/output is empty after the kill.
+
+### Verifying mutual authentication
+
+To confirm the system rejects a connection without a valid certificate run the
+following command from your host machine while the receiver is listening inside
+the container.
+
+```bash
+openssl s_client -connect 127.0.0.1:9090
+```
+
+The receiver closes the connection immediately because no client certificate was
+presented.
+
+---
+
+<!-- Step 6 and beyond will be added as each program is completed -->

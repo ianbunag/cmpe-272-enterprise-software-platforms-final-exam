@@ -1,0 +1,30 @@
+networks:
+  transfer-net:
+    driver: bridge
+
+services:
+  receiver:
+    build:
+      context: .
+      dockerfile: cmd/receiver/Dockerfile
+    networks:
+      - transfer-net
+    volumes:
+      - ./runtime/certs:/certs:ro
+      - ./runtime/output:/output
+    stdin_open: true
+    tty: true
+
+  sender:
+    build:
+      context: .
+      dockerfile: cmd/sender/Dockerfile
+    networks:
+      - transfer-net
+    depends_on:
+      - receiver
+    volumes:
+      - ./runtime/certs:/certs:ro
+      - ./runtime/data:/data:ro
+    stdin_open: true
+    tty: true
