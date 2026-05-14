@@ -1,75 +1,19 @@
 # Secure File Transfer
 
-## Prerequisites
-
-- OpenSSL
-- Docker and Docker Compose
+Two distinct implementations for securely transferring a 4 GB file over an untrusted
+network, satisfying Confidentiality, Integrity, Authenticity, and Availability.
 
 ---
 
 ## Approach A — mTLS Streaming
 
-### 1. Generate certificates
+Sender and receiver authenticate each other with mutual TLS 1.3. The file is streamed
+in 32 KB chunks directly over the encrypted channel. A SHA-256 hash computed on both
+ends confirms the file arrived intact.
 
-```bash
-bash approach-a-mtls/gen_certs.sh
-```
-
-### 2. Generate the 4 GB test file
-
-```bash
-bash approach-a-mtls/gen_test_file.sh
-```
-
-### 3. Build the Docker images
-
-```bash
-cd approach-a-mtls
-docker compose build
-```
-
-### 4. Start the containers
-
-```bash
-docker compose up -d
-```
-
-### 5. Start the receiver
-
-In terminal 1:
-
-```bash
-docker compose exec receiver sh
-```
-
-```bash
-./receiver -addr :9090 -ca /certs/ca.crt -cert /certs/receiver.crt -key /certs/receiver.key -out /output
-```
-
-### 6. Run the sender
-
-In terminal 2:
-
-```bash
-docker compose exec sender sh
-```
-
-```bash
-./sender -file /data/test_4gb.bin -addr receiver:9090 -ca /certs/ca.crt -cert /certs/sender.crt -key /certs/sender.key -server-name receiver
-```
-
-### 7. Verify
-
-The receiver prints the following when the transfer is complete and the hash matches.
-
-```
-transfer complete. file saved to /output/test_4gb.bin sha256 verified
-```
-
-The received file is available on your host machine at `approach-a-mtls/runtime/output/test_4gb.bin`.
-
-### 8. Tear down
-
-```bash
-docker compose down
-```
+| Document | Description |
+|---|---|
+| [QUICKSTART.md](approach-a-mtls/QUICKSTART.md) | Get Approach A running end-to-end in under 5 minutes. Start here. |
+| [SMOKE_TEST.md](approach-a-mtls/SMOKE_TEST.md) | Three test cases covering retry backoff, mid-transfer failure cleanup, and attacker rejection. Run these to verify correctness. |
+| [DESIGN.md](approach-a-mtls/DESIGN.md) | Architecture diagram, key exchange, chunking and framing, exact algorithms and parameters, and the full threat model table. |
+| [CHECKLIST.md](approach-a-mtls/CHECKLIST.md) | Answers every design question from the assessment checklist — language choice, memory handling, CIAA coverage, threat model responses, and crypto library decisions. |

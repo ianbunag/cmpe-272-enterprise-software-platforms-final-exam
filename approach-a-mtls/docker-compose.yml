@@ -28,3 +28,12 @@ services:
       - ./runtime/data:/data:ro
     stdin_open: true
     tty: true
+
+  attacker:
+    build:
+      context: .
+      dockerfile: cmd/attacker/Dockerfile
+    networks:
+      - transfer-net
+    stdin_open: true
+    tty: true
