@@ -36,5 +36,7 @@ services:
       dockerfile: cmd/attacker/Dockerfile
     networks:
       - transfer-net
+    volumes:
+      - ./runtime/keys:/keys:ro
     stdin_open: true
     tty: true

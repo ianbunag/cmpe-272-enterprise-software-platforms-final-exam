@@ -193,13 +193,16 @@ func handleConnection(conn net.Conn, privKey *rsa.PrivateKey, senderPub *rsa.Pub
 		return
 	}
 
-	success := false
+	// wipeOnExit is set only on explicit verification failures (bad AEAD tag or SHA-256
+	// mismatch). A plain connection drop leaves it false so the .tmp and .state files
+	// are preserved for the next reconnect to resume from.
+	wipeOnExit := false
 	defer func() {
 		tmpFile.Close()
-		if !success {
+		if wipeOnExit {
 			os.Remove(tmpPath)
 			os.Remove(statePath)
-			log.Printf("partial file removed")
+			log.Printf("partial file removed due to verification failure")
 		}
 	}()
 
@@ -234,6 +237,7 @@ func handleConnection(conn net.Conn, privKey *rsa.PrivateKey, senderPub *rsa.Pub
 		plaintext, err := gcm.Open(nil, nonce, ciphertext, nil)
 		if err != nil {
 			log.Printf("AEAD tag verification failed on chunk %d", chunkIdx)
+			wipeOnExit = true
 			return
 		}
 
@@ -286,6 +290,7 @@ func handleConnection(conn net.Conn, privKey *rsa.PrivateKey, senderPub *rsa.Pub
 	}
 	if got != info.ExpectedSHA256 {
 		log.Printf("SHA-256 mismatch expected %s got %s", info.ExpectedSHA256, got)
+		wipeOnExit = true
 		return
 	}
 
@@ -297,7 +302,6 @@ func handleConnection(conn net.Conn, privKey *rsa.PrivateKey, senderPub *rsa.Pub
 
 	totalMB := float64(bytesReceived) / (1024 * 1024)
 	totalSec := time.Since(start).Seconds()
-	success = true
 	log.Printf("transfer complete received %.1f MB in %.1f seconds average %.2f MB/s file saved to %s sha256 verified",
 		totalMB, totalSec, totalMB/totalSec, finalPath)
 }
