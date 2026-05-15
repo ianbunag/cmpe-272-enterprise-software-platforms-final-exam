@@ -59,10 +59,6 @@ docker compose exec sender sh
 
 The receiver prints the following when the transfer is complete and the hash matches.
 
-```
-transfer complete received ... file saved to /output/test_4gb.bin sha256 verified
-```
-
 The received file is available on your host machine at `runtime/output/test_4gb.bin`.
 
 ### 8. Tear down
