@@ -5,6 +5,15 @@ network, satisfying Confidentiality, Integrity, Authenticity, and Availability.
 
 ---
 
+## AI Usage
+
+| Document | Description |
+|---|---|
+| [AI_NOTES.md](AI_NOTES.md) | How Claude and other AI tools were directed across both approaches — prompting strategy, review process, and each tool's role. |
+| [AI_USAGE_WRITEUP.md](AI_USAGE_WRITEUP.md) | Evaluation of Claude's performance — what it wrote end-to-end, a concrete example of catching a mistake, and one thing it did better and worse than expected. |
+
+---
+
 ## Approach A — mTLS Streaming
 
 Sender and receiver authenticate each other with mutual TLS 1.3. The file is streamed
