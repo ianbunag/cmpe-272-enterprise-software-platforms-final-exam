@@ -1,0 +1,42 @@
+networks:
+  transfer-net:
+    driver: bridge
+
+services:
+  receiver:
+    build:
+      context: .
+      dockerfile: cmd/receiver/Dockerfile
+    networks:
+      - transfer-net
+    volumes:
+      - ./runtime/keys:/keys:ro
+      - ./runtime/output:/output
+    stdin_open: true
+    tty: true
+
+  sender:
+    build:
+      context: .
+      dockerfile: cmd/sender/Dockerfile
+    networks:
+      - transfer-net
+    depends_on:
+      - receiver
+    volumes:
+      - ./runtime/keys:/keys:ro
+      - ./runtime/data:/data:ro
+      - ./runtime/sessions:/sessions
+    stdin_open: true
+    tty: true
+
+  attacker:
+    build:
+      context: .
+      dockerfile: cmd/attacker/Dockerfile
+    networks:
+      - transfer-net
+    volumes:
+      - ./runtime/keys:/keys:ro
+    stdin_open: true
+    tty: true
