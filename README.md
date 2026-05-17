@@ -45,3 +45,7 @@ a killed transfer can resume from the last checkpoint rather than restarting fro
 | [SMOKE_TEST.md](approach-b-hybrid-aes/SMOKE_TEST.md) | Three test cases covering successful transfer, mid-transfer resumption, and attacker rejection. Run these to verify correctness. |
 | [DESIGN.md](approach-b-hybrid-aes/DESIGN.md) | Architecture diagram, wire protocol, key management, chunking and nonce derivation, exact algorithms and parameters, and the full threat model table. |
 | [CHECKLIST.md](approach-b-hybrid-aes/CHECKLIST.md) | Answers every design question from the assessment checklist — language choice, memory handling, resumability, CIAA coverage, threat model responses, stretch features, and crypto library decisions. |
+
+## Prompting approach
+<img width="863" height="566" alt="Screenshot 2026-05-17 at 11 53 15" src="https://github.com/user-attachments/assets/8e3070bc-356d-4414-bdc3-095902d19108" />
+
