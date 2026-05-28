@@ -3,7 +3,7 @@
 Two distinct implementations for securely transferring a 4 GB file over an untrusted
 network, satisfying Confidentiality, Integrity, Authenticity, and Availability.
 
-## Demo video
+##  I BUILT A SECURE FILE TRANSFER CLI APP 4 HOURS INTO PURCHASING CLAUDE PRO (Demo video)
 
 [![Watch the video](https://img.youtube.com/vi/E7eTa5m6DVw/0.jpg)](https://www.youtube.com/watch?v=E7eTa5m6DVw)
 
