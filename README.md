@@ -4,7 +4,8 @@ Two distinct implementations for securely transferring a 4 GB file over an untru
 network, satisfying Confidentiality, Integrity, Authenticity, and Availability.
 
 ## Demo video
-https://youtu.be/E7eTa5m6DVw
+
+[![Watch the video](https://img.youtube.com/vi/E7eTa5m6DVw/0.jpg)](https://www.youtube.com/watch?v=E7eTa5m6DVw)
 
 ## AI Usage
 
